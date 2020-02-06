@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.citius.dbDemo.exception.ResourceNotFoundException;
 import com.citius.dbDemo.model.Employee;
 import com.citius.dbDemo.repository.EmployeeRepository;
 
@@ -44,15 +45,16 @@ public class EmployeeController {
 	public void deleteEmployee(@RequestParam Integer empID) {
 		employeeRepository.deleteById(empID);
 	}
-	
+
 	@PutMapping("/update/{id}")
-	public void updateEmployee(@PathVariable(value = "id") Integer empId,@RequestBody Employee emp) {
-		Optional<Employee> e=employeeRepository.findById(empId);
-      if(e.isPresent()) {
-    	 e.get().setEmail(emp.getEmail());
-    	 e.get().setName(emp.getName());
-    	 employeeRepository.save(e.get());
-      }
-}
+	public void updateEmployee(@PathVariable(value = "id") Integer empId, @RequestBody Employee emp) {
+		Employee e = employeeRepository.findById(empId)
+				.orElseThrow(() -> new ResourceNotFoundException("Employee", "id", empId));
+
+		e.setEmail(emp.getEmail());
+		e.setName(emp.getName());
+		employeeRepository.save(e);
+
+	}
 
 }
